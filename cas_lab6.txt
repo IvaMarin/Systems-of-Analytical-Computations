@@ -1,0 +1,63 @@
+Лабораторная работа 6.
+
+Работа с дифференциальными уравнениями в Wolfram (с примерами из книги "Введение в научный Python").
+
+Модель "Хищник-Жертва" (стр. 247).
+
+Зададим ситему ДУ и решим её.
+
+In[1]:= modelHishchnikZhertva[x_, a_, b_, c_, d_]:= Module[
+        {
+        	sol,
+        	eq1,
+        	eq2,
+        	t
+    	},
+
+    	(* Уравнения системы *)
+    	eq1[t_] := x'[t] == x[t] * (a - b * y[t]);
+    	eq2[t_] := y'[t] == y[t] * (-c + d * x[t]);
+
+    	(* Численное решение системы ДУ*)
+    	sol = NDSolve[
+        	{
+           		eq1[t], 
+            		eq2[t], 
+    			(* начальные условия *)
+           		x[0] == 2, 
+            		y[0] == 1 
+        	},
+        	{x, y},
+        	{t, 0, 7},
+        	MaxSteps -> 3000
+    	];
+
+(* Получили результат sol в виде интерполирующей функции *)
+
+	dataset = Table[
+		  {
+			x[t], y[t]} /. sol[[1]], (* заменяем x[t] на интерполирующую функцию и y[t] аналогично *)
+			{t, 0, 7, 0.1}
+			(* от 0 до 7 с шагом 0.1 -- т. е. получим 70 точек *)
+		  ];
+
+(* получили список точек: {{x0, y0}, {x1, y1}, ...} *)
+
+(* Строим график по полученным точкам *)
+
+	ListPlot[dataset,Joined->True,PlotRange->All, ImageSize->500] (* отображаем точки на холсте *)             
+]
+
+Вывод графика для модели "Хищник-Жертва" с интерактивным взаимодействием.
+
+In[2]:= Manipulate[
+		modelHishchnikZhertva[x, a, b, c, d],
+
+		(* {параметр, мин. зн., макс. зн., шаг} *)
+		{a, 1, 10, 1},
+		{b, 1, 10, 1},
+		{c, 1, 10, 1},
+		{d, 1, 10, 1}
+	]
+
+Out[2]= TagBox[StyleBox[DynamicModuleBox[{Set[a$$, 5], Set[b$$, 3], Set[c$$, 4], Set[d$$, 5], Set[Typeset`show$$, True], Set[Typeset`bookmarkList$$, {}], Set[Typeset`bookmarkMode$$, "Menu"], Typeset`animator$$, Set[Typeset`animvar$$, 1], Set[Typeset`name$$, "\"untitled\""], Set[Typeset`specs$$, {{Hold[a$$], 1, 10, 1}, {Hold[b$$], 1, 10, 1}, {Hold[c$$], 1, 10, 1}, {Hold[d$$], 1, 10, 1}}], Set[Typeset`size$$, Automatic], Set[Typeset`update$$, 0], Set[Typeset`initDone$$, False], Set[Typeset`skipInitDone$$, True]}, DynamicBox[Manipulate`ManipulateBoxes[1, StandardForm, "Variables" :> {Set[a$$, 1], Set[b$$, 1], Set[c$$, 1], Set[d$$, 1]}, "ControllerVariables" :> {}, "OtherVariables" :> {Typeset`show$$, Typeset`bookmarkList$$, Typeset`bookmarkMode$$, Typeset`animator$$, Typeset`animvar$$, Typeset`name$$, Typeset`specs$$, Typeset`size$$, Typeset`update$$, Typeset`initDone$$, Typeset`skipInitDone$$}, "Body" :> modelHishchnikZhertva[x, a$$, b$$, c$$, d$$], "Specifications" :> {{a$$, 1, 10, 1}, {b$$, 1, 10, 1}, {c$$, 1, 10, 1}, {d$$, 1, 10, 1}}, "Options" :> {}, "DefaultOptions" :> {}], SingleEvaluation -> True], Deinitialization :> None, UntrackedVariables :> {Typeset`size$$}, SynchronousInitialization -> True, UnsavedVariables :> {Typeset`initDone$$}, UndoTrackedVariables :> {Typeset`show$$, Typeset`bookmarkMode$$}], "Manipulate", Deployed -> True, StripOnInput -> False], Manipulate`InterpretManipulate[1]]

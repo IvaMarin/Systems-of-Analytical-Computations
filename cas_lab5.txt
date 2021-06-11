@@ -1,0 +1,107 @@
+Лабораторная работа 5.
+
+Полиномы и GCD. Алгоритм Евклида. Тождество Безу.
+
+Вариант 5.
+
+In[81]:= x=.
+	 f := 12*x^7 - 168*x^5 + 288*x^3 + 324*x;
+	 f//TraditionalForm
+
+Out[83]//TraditionalForm= FormBox[RowBox[{RowBox[{"12", " ", SuperscriptBox["x", "7"]}], "-", RowBox[{"168", " ", SuperscriptBox["x", "5"]}], "+", RowBox[{"288", " ", SuperscriptBox["x", "3"]}], "+", RowBox[{"324", " ", "x"}]}], TraditionalForm]
+
+In[84]:= g := 4*x^6 - 28*x^4 + 20*x^3 + 48*x^2 - 60*x;
+	 g//TraditionalForm
+
+Out[85]//TraditionalForm= FormBox[RowBox[{RowBox[{"4", " ", SuperscriptBox["x", "6"]}], "-", RowBox[{"28", " ", SuperscriptBox["x", "4"]}], "+", RowBox[{"20", " ", SuperscriptBox["x", "3"]}], "+", RowBox[{"48", " ", SuperscriptBox["x", "2"]}], "-", RowBox[{"60", " ", "x"}]}], TraditionalForm]
+
+Найдем НОД при помощи встроенной функции PolynomialGCD[]
+
+In[86]:= PolynomialGCD[f,g]
+
+Out[86]= -12 x+4 SuperscriptBox["x", "3"]
+
+In[87]:= {gcdWolfram, {uWolfram, vWolfram}} = PolynomialExtendedGCD[f,g,x];
+	 "GCD = " gcdWolfram
+	 "u = " uWolfram//Simplify
+	 "v = " vWolfram//Simplify
+
+Out[88]= GCD =  (-3 x+SuperscriptBox["x", "3"])
+
+Out[89]= FractionBox[RowBox[{"\"u = \"", " ", RowBox[{"(", RowBox[{RowBox[{"-", "722"}], "+", RowBox[{"145", " ", "x"}], "+", RowBox[{"117", " ", SuperscriptBox["x", "2"]}]}], ")"}]}], "173976"]
+
+Out[90]= -FractionBox[RowBox[{"\"v = \"", " ", RowBox[{"(", RowBox[{RowBox[{"-", "1600"}], "-", RowBox[{"1541", " ", "x"}], "+", RowBox[{"145", " ", SuperscriptBox["x", "2"]}], "+", RowBox[{"117", " ", SuperscriptBox["x", "3"]}]}], ")"}]}], "57992"]
+
+In[91]:= TautologyQ[Simplify[uWolfram*f + vWolfram*g - gcdWolfram] == 0]
+
+Out[91]= True
+
+Тождество Безу выполняется для PolynomialExtendedGCD[].
+
+Теперь рассмотрим реализацию функции расширенного алгоритма Евклида для полиномов.
+
+In[92]:= x=.;
+	 (* Функция вычисления коэффициентов тождества Безу и gcd(a,b) *)
+	 myBezoutPoly[aa_, bb_]:=Module[
+				 (* local variables *)
+				 {a=aa, b=bb
+					, x0=1
+					, xx=0
+					, y0=0
+					, yy = 1
+					, q, r
+				 }
+				 ,
+            	While[
+				 Not[SameQ[b, 0]] (* while b not equal to zero *)
+				 ,
+					q = PolynomialQuotient[a, b,x];
+					r = PolynomialRemainder[a, b,x];
+					{a, b} = {b, r};
+					{x0, xx} = {xx, (x0 - xx*q)//ExpandAll};
+					{y0, yy} = {yy, (y0 - yy*q)//ExpandAll};
+                    
+		     ];
+				 {x0, y0, a}(* return {u, v, GCD}*)
+				];
+
+In[94]:= { uMy, vMy, gcdMy} =  myBezoutPoly[f, g];
+	 "GCD = " gcdMy
+	 "u = " uMy
+	 "v = " vMy
+
+Out[95]= GCD =  (FractionBox[RowBox[{"1420804", " ", "x"}], "1521"]-FractionBox[RowBox[{"1420804", " ", SuperscriptBox["x", "3"]}], "4563"])
+
+Out[96]= u =  (FractionBox["17689", "13689"]-FractionBox[RowBox[{"7105", " ", "x"}], "27378"]-FractionBox[RowBox[{"49", " ", SuperscriptBox["x", "2"]}], "234"])
+
+Out[97]= v =  (-FractionBox["39200", "4563"]-FractionBox[RowBox[{"75509", " ", "x"}], "9126"]+FractionBox[RowBox[{"7105", " ", SuperscriptBox["x", "2"]}], "9126"]+FractionBox[RowBox[{"49", " ", SuperscriptBox["x", "3"]}], "78"])
+
+In[98]:= TautologyQ[Simplify[ uMy*f +  vMy*g - gcdMy] == 0]
+
+Out[98]= True
+
+Тождество Безу выполняется для  myBezoutPoly[].
+
+In[99]:= lastCoef[poly_, x_] := Coefficient[
+			poly
+			, x
+			, Exponent[poly, x]
+		]
+
+Нормируем полученные многочлены для последующей работы с ними. 
+Для этого найдем старший коэффициент многочленов gcdWolfram и gcdMy.
+Затем поделим их на соответсвующий коэффициент.
+
+In[100]:= rSTD = gcdWolfram/lastCoef[gcdWolfram, x]//Expand
+
+Out[100]= -3 x+SuperscriptBox["x", "3"]
+
+In[101]:= rMy =gcdMy/lastCoef[gcdMy, x]//Expand
+
+Out[101]= -3 x+SuperscriptBox["x", "3"]
+
+In[102]:= TautologyQ[rSTD ==rMy]
+
+Out[102]= True
+
+Результаты совпали. Коэффициенты найдены верно.

@@ -1,0 +1,217 @@
+Лабораторная работа 4.
+
+Анализ функции и графики.
+
+*Примечание:  в некотрых парах In[i] Out[i] отсутствуют Out-ы, так как в формате .txt их отображение не очень-то наглядно. 
+
+Вариант:
+
+In[7]:= tasks = {
+	Sin[2*x^3]^2/x^3
+	, (x^2 - 4)*Sin[(Pi*(x^2))/6] / (x^2 - 1)
+	, Sqrt[Abs[3*x^3 + 2*x^2 - 10*x]] / (4*x)
+	, 1/2 * Log[Sqrt[x^2 + 1] / Sqrt[x^2 - 1]] - 15*x^2
+	, (x^3 - x^2 - x + 1)^(1/3) / Tan[x]
+	, 2*Log[(x - 1) / x] + 1
+	, Log[x - 1] / (x - 1)^2
+}
+
+In[8]:= getVariantForNumber[number_,variationsQuo_]:=(
+		Module[{t},
+			t = Mod[number , variationsQuo];
+			If[t != 0
+				, t
+    				, variationsQuo
+   			]
+		]
+)
+
+In[9]:= Table[Plot[tasks[[i]], {x, -10, 10}], {i, 1, Length[tasks]}]
+
+In[10]:= yourNumber = 20 
+	 numberOfYourTask =getVariantForNumber[yourNumber, Length[tasks]]
+	 Print["Номер вашего задания: ", numberOfYourTask]
+
+Out[10]= 20
+
+Out[11]= 6
+
+Номер вашего задания: 6
+
+In[13]:= f[y_] := tasks[[numberOfYourTask]]/.x->y;
+	 f[x]//TraditionalForm
+
+График функции.
+
+In[20]:= funcPlot =Plot[f[x], {x, -10, 10}, PlotRange->{-10,10}, ImageSize->Large]
+
+Область определения.
+
+D(f):  (x-1)/x >  0 => x \[Element] (-\[Infinity]; 0) U (1; +\[Infinity]) 
+
+Четность функции.
+
+In[18]:= isEven = TautologyQ[f[x] == f[-x]];
+	isOdd = TautologyQ[f[x] + f[-x] == 0];
+	If[isEven == True,"Функция четная", Null]
+	If[isOdd,"Функция нечетная", Null]
+	If[Not[isEven||isOdd], "Функция прочая", Null]
+
+Out[22]= Функция прочая
+
+Периодичность.
+
+In[33]:= FunctionPeriod[f[x], x]
+
+Out[33]= 0
+
+Получили значение 0, значит периодичность отсутствует.
+
+Точки пересечения графика с осями координат.
+
+In[34]:= sols = Solve[f[x]==0, x]
+	 points = {x, 0}/.sols  (*вместо правил замены получаем список точек путем операции подстановки*)
+
+
+In[73]:= g1 = Plot[f[x], {x, -10, 10}, PlotRange->{-10,10} , PlotStyle->Blue, ImageSize->Large];
+	 g2 = ListPlot[points, PlotStyle->{Red, PointSize[Large]}];
+	 Show[{g1, g2}]
+	 f[First[First[points]]]//Simplify
+
+Out[76]= 0
+
+Промежутки знакопостоянства.
+
+valLeft =f[First[First[points]]-0.1]
+valRight = f[First[First[points]]+0.1]
+
+Out[80]= -0.0538601
+
+Out[81]= 0.0485243
+
+Также нас буду интересовать точки разрыва, их более строгое определение будет приведено чуть ниже. На данном этапе определим их по графику. Это точки x = 0 и x = 1.
+
+In[82]:= valZeroLeft =f[0-0.1]
+	valZeroRight = f[0+0.1]
+	valOneLeft =f[1-0.1]
+	valOneRight = f[1+0.1]
+
+
+Out[82]= 5.79579
+
+Out[83]= 5.39445\[VeryThinSpace]+6.28319 \[ImaginaryI]
+
+Out[84]= -3.39445+6.28319 \[ImaginaryI]
+
+Out[85]= -3.79579
+
+Итак, функция положительна на интервале x \[Element] (-\[Infinity]; 0) \[Union] (sqrt {e}/(sqrt{e}\[Minus]1); +\[Infinity]) и отрицательна на интервале x \[Element] (1; sqrt {e}/(sqrt{e}\[Minus]1))
+
+In[132]:= Show[
+    Graphics[Line[{{-1, 0}, {3, 0}}]],
+    Graphics[{PointSize[0.03], Point[{0, 0}, VertexColors->Red]}],
+    Graphics[Text[0, {0, -0.4}]],
+    Graphics[{PointSize[0.03], Point[{First[First[points]], 0}, VertexColors->Red]}],
+    Graphics[Text[First[First[points]], {2.55, -0.5}]],
+    Graphics[{PointSize[0.03], Point[{1, 0}, VertexColors->Red]}],
+    Graphics[Text[1, {1, -0.4}]],
+    Graphics[Text[Style["+", FontSize -> Scaled[0.06]], {-0.5, 0.3}]],
+    Graphics[Text[Style["-", FontSize -> Scaled[0.06]], {1.8, 0.3}]],
+    Graphics[Text[Style["+", FontSize -> Scaled[0.06]], {2.8, 0.3}]]
+]
+
+Промежутки возрастания и убывания. Точки экстремума и значения в этих точках.
+
+Найдём точки, производная в которых равна нулю.
+
+In[133]:= df = D[f[x], x]
+
+In[135]:= Solve[df == 0, x]
+
+Out[135]= {}
+
+Такие точки отсутствуют, а значит отсутствуют и критические точки (соответственно и точки экстремума).
+Кроме того, можно заметить, что производная всегда положительна на всей области определения, а значит данная функция возрастает на всей области определения.
+Это видно и по графику.
+
+Непрерывность. Наличие точек разрыва и их классификация.
+
+Нас будут интересовать точки x = 0 и x = 1
+1) Для точки x = 0 найдем левосторонний и правосторонний пределы.
+
+In[161]:= Limit[f[x], x->0]
+	  Limit[f[x], x->0+0.0000000001]
+	  Limit[f[x], x->0-0.0000000001]
+
+Out[161]= \[Infinity]
+
+Out[162]= 47.0517\[VeryThinSpace]+6.28319 \[ImaginaryI]
+
+Out[163]= 47.0517
+
+Левосторонний предел существует (бесконечный), а правосторонний не существует, значит это разрыв 2-го рода.
+
+2) Для точки x = 1 также найдем левосторонний и правосторонний пределы.
+
+In[164]:= Limit[f[x], x->1]
+	  Limit[f[x], x->1+0.000000001]
+	  Limit[f[x], x->1-0.000000001]
+
+Out[164]= -\[Infinity]
+
+Out[165]= -40.4465
+
+Out[166]= -40.4465+6.28319 \[ImaginaryI]
+
+Левосторонний предел не существует, а правосторонний существует (бесконечный), значит это также разрыв 2-го рода.
+
+Асимптоты.
+
+1) Проверим наличие горизонтальной асимптоты:
+
+In[8]:= Limit[f[x], x->+\[Infinity]]
+	Limit[f[x], x->-\[Infinity]]
+
+Out[8]= 1
+
+Out[9]= 1
+
+Так как оба эти предела существуют, то прямая y = 1 является горизонтальной асимптотой.
+
+2) Проверим наличие вертикальных асимптот:
+
+In[10]:= Limit[f[x], x->0]
+	 Limit[f[x], x->1]
+
+Out[10]= \[Infinity]
+
+Out[11]= -\[Infinity]
+
+Наличие двух данных асимптот x = 0 и x = 1 вытекает и из определенных нами ранее разрывов.
+
+3) Проверим наличие наклонных асимптот:
+
+In[12]:= Limit[f[x] / x, x->Infinity]
+
+Out[12]= 0
+
+Полученный предел равен 0, значит наклонных асимптот нет.
+
+Теперь построим полученные асимптоты на графике.
+
+In[22]:= plotAsympt1 = Plot[
+                1, 
+                {x, -10, 10}, 
+                PlotStyle->{Red, Dashed}, 
+                ImageSize->Large
+            ];
+
+In[118]:= plotAsympt2 = Graphics[{Dashed, Red, Line[{{1, -9.99}, {1, 9.99}}]}];
+	  plotAsympt3 = Graphics[{Dashed, Red, Thickness[0.004], Line[{{0, -9.99}, {0, 9.99}}]}];
+
+In[120]:= Show[
+		funcPlot,
+		plotAsympt1,
+		plotAsympt2,
+		plotAsympt3
+	  ]
